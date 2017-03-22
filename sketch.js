@@ -14,38 +14,57 @@ var yellow = [255, 255, 0];
 var orange = [255, 165, 0];
 var red = [255, 0, 0];
 var colors = [red, orange, yellow, green, blue, indigo, violet];
-var Bb3, C4, Eb4, F4, G4, A4, Bb4;
+var Bb3, C4, D4, Eb4, F4, G4, A4, Bb4;
+var Bb3Chord;
+var C4Chord = [1, 3, 5];
+var D4Chord = [2, 4, 6];
+var Eb4Chord = [];
+var F4Chord = [];
+var G4Chord = [];
+var A4Chord = [];
+var chords = [Bb3Chord, C4Chord, D4Chord];
 var notes;
+var vid;
 
 function preload() {
+    // vid = createVideo("assets/vid.mp4");
+    // img = loadImage("assets/mountains.jpg");
     img = loadImage("assets/rainbow.png");
     Bb3 = loadSound("assets/Bb3.mp3");
     C4 = loadSound("assets/C4.mp3");
+    D4 = loadSound("assets/D4.mp3");
     Eb4 = loadSound("assets/Eb4.mp3");
     F4 = loadSound("assets/F4.mp3");
     G4 = loadSound("assets/G4.mp3");
     A4 = loadSound("assets/A4.mp3");
-    Bb4 = loadSound("assets/Bb4.mp3");
-    notes = [Bb3, C4, Eb4, F4, G4, A4, Bb4];
+    // Bb4 = loadSound("assets/Bb4.mp3");
+
+    // Load chords
+    Bb3Chord = loadSound("assets/Bb3Chord.mp3");
+
+    // Notes in array
+    notes = [Bb3Chord, C4, D4, Eb4, F4, G4, A4, Bb4];
 }
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
     image(img, 0, 0);
-    var c = get(90, 90);
-    var avgCol = getAverageRGBSquare(random(img.width), random(img.height));
-    fill(avgCol[0], avgCol[1], avgCol[2]);
-    noStroke();
-    rect(windowWidth - 75, windowHeight - 75, 50, 50);
-    osc = new p5.Oscillator();
-    osc.setType('sine');
-    osc.amp(0.5);
-    osc2 = new p5.Oscillator();
-    osc2.setType('sine');
-    osc2.amp(0.5);
-    osc3 = new p5.Oscillator();
-    osc3.setType('sine');
-    osc3.amp(0.5);
+    //vid.volume(0);
+    //vid.play();
+    // var c = get(90, 90);
+    // var avgCol = getAverageRGBSquare(random(img.width), random(img.height));
+    // fill(avgCol[0], avgCol[1], avgCol[2]);
+    // noStroke();
+    // rect(windowWidth - 75, windowHeight - 75, 50, 50);
+    // osc = new p5.Oscillator();
+    // osc.setType('sine');
+    // osc.amp(0.5);
+    // osc2 = new p5.Oscillator();
+    // osc2.setType('sine');
+    // osc2.amp(0.5);
+    // osc3 = new p5.Oscillator();
+    // osc3.setType('sine');
+    // osc3.amp(0.5);
     // osc.start();
     // osc2.start();
     // osc3.start();
@@ -108,13 +127,27 @@ function mapToSound(col) {
         }
     }
 
+    // Add random chance to play chord for now (maybe 1 in 3?)
+    // var guess = floor(random() * 2);
+    // if (guess == 1 && chosenIndex < 3) {
+    //     return chords[chosenIndex];
+    // }
+
     // If this chosenIndex is the same as last chosen index
     // Return the next note in chord instead??
     // Repeats don't sound that good
     return chosenIndex;
 }
 
+function playChord(base) {
+
+
+}
+
 function draw() {
+    // background(255);
+    // image(vid, 0, 0); // draw a second copy to canvas
+
     if (timer < interval) {
         timer++;
     } else {
@@ -126,6 +159,11 @@ function draw() {
         console.log("R: " + colVal[0]);
         console.log("G: " + colVal[1]);
         console.log("B: " + colVal[2]);
+        // var toPlay = mapToSound(colVal);
+        // for (var i = 0; i < toPlay.length; i++) {
+        //     // console.log(" PLAYING NOTESSSS + " + i);
+        //     notes[toPlay[i]].play();
+        // }
         notes[mapToSound(colVal)].play();
         // osc.freq(colVal[0]);
         // osc2.freq(colVal[1]);
