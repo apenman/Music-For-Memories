@@ -5,31 +5,20 @@ var interval = 10,
 var row = 1;
 var debug = true;
 
-// Colors
-var violet = [238, 130, 238];
-var indigo = [75, 0, 130];
-var blue = [0, 0, 255];
-var green = [0, 128, 0];
-var yellow = [255, 255, 0];
-var orange = [255, 165, 0];
-var red = [255, 0, 0];
-var colors = [red, orange, yellow, green, blue, indigo, violet];
+var violet, indigo, blue, green, yellow, orange, red, colors;
 var Bb3, C4, D4, Eb4, F4, G4, A4, Bb4;
-var Bb3Chord;
-var C4Chord = [1, 3, 5];
-var D4Chord = [2, 4, 6];
-var Eb4Chord = [];
-var F4Chord = [];
-var G4Chord = [];
-var A4Chord = [];
-var chords = [Bb3Chord, C4Chord, D4Chord];
+var Bb3Chord, C4Chord, D4Chord, Eb4Chord, F4Chord, G4Chord, A4Chord;
+var chords;
 var notes;
 var vid;
 
 function preload() {
+    // What image are we using?
     // vid = createVideo("assets/vid.mp4");
     // img = loadImage("assets/mountains.jpg");
     img = loadImage("assets/rainbow.png");
+
+    // Load notes
     Bb3 = loadSound("assets/Bb3.mp3");
     C4 = loadSound("assets/C4.mp3");
     D4 = loadSound("assets/D4.mp3");
@@ -37,13 +26,32 @@ function preload() {
     F4 = loadSound("assets/F4.mp3");
     G4 = loadSound("assets/G4.mp3");
     A4 = loadSound("assets/A4.mp3");
-    // Bb4 = loadSound("assets/Bb4.mp3");
 
     // Load chords
     Bb3Chord = loadSound("assets/Bb3Chord.mp3");
+    C4Chord = loadSound("assets/C4Chord.mp3");
+    D4Chord = loadSound("assets/D4Chord.mp3");
+    Eb4Chord = loadSound("assets/Eb4Chord.mp3");
+    F4Chord = loadSound("assets/F4Chord.mp3");
+    G4Chord = loadSound("assets/G4Chord.mp3");
+    A4Chord = loadSound("assets/A4Chord.mp3");
 
     // Notes in array
-    notes = [Bb3Chord, C4, D4, Eb4, F4, G4, A4, Bb4];
+    notes = [Bb3, C4, D4, Eb4, F4, G4, A4, Bb4];
+    // Chords in array
+    chords = [Bb3Chord, C4Chord, D4Chord, Eb4Chord, F4Chord, G4Chord, A4Chord];
+
+    // Load colors
+    violet = [238, 130, 238];
+    indigo = [75, 0, 130];
+    blue = [0, 0, 255];
+    green = [0, 128, 0];
+    yellow = [255, 255, 0];
+    orange = [255, 165, 0];
+    red = [255, 0, 0];
+
+    // Colors in array
+    colors = [red, orange, yellow, green, blue, indigo, violet];
 }
 
 function setup() {
