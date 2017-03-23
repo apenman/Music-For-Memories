@@ -135,12 +135,6 @@ function mapToSound(col) {
         }
     }
 
-    // Add random chance to play chord for now (maybe 1 in 3?)
-    // var guess = floor(random() * 2);
-    // if (guess == 1 && chosenIndex < 3) {
-    //     return chords[chosenIndex];
-    // }
-
     // If this chosenIndex is the same as last chosen index
     // Return the next note in chord instead??
     // Repeats don't sound that good
@@ -172,7 +166,17 @@ function draw() {
         //     // console.log(" PLAYING NOTESSSS + " + i);
         //     notes[toPlay[i]].play();
         // }
-        notes[mapToSound(colVal)].play();
+
+        var nextIndex = mapToSound(colVal);
+        // Add random chance to play chord for now (maybe 1 in 3?)
+        var guess = floor(random() * 5);
+        if (guess == 1) {
+            console.log("CHOOOOOORD");
+            chords[nextIndex].play();
+        } else {
+            notes[nextIndex].play();
+
+        }
         // osc.freq(colVal[0]);
         // osc2.freq(colVal[1]);
         // osc3.freq(colVal[2]);
