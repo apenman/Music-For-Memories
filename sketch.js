@@ -1,5 +1,4 @@
 var img;
-var osc, osc2, osc3;
 var interval = 10,
     timer = 0;
 var row = 1;
@@ -64,18 +63,6 @@ function setup() {
     // fill(avgCol[0], avgCol[1], avgCol[2]);
     // noStroke();
     // rect(windowWidth - 75, windowHeight - 75, 50, 50);
-    // osc = new p5.Oscillator();
-    // osc.setType('sine');
-    // osc.amp(0.5);
-    // osc2 = new p5.Oscillator();
-    // osc2.setType('sine');
-    // osc2.amp(0.5);
-    // osc3 = new p5.Oscillator();
-    // osc3.setType('sine');
-    // osc3.amp(0.5);
-    // osc.start();
-    // osc2.start();
-    // osc3.start();
 }
 
 function getAverageRGBSquare(xVal, yVal) {
@@ -141,11 +128,6 @@ function mapToSound(col) {
     return chosenIndex;
 }
 
-function playChord(base) {
-
-
-}
-
 function draw() {
     // background(255);
     // image(vid, 0, 0); // draw a second copy to canvas
@@ -158,31 +140,34 @@ function draw() {
         var xRand = random(img.width - 40);
         var yRand = random(img.height - 40);
         var colVal = getAverageRGBSquare(xRand, yRand);
-        console.log("R: " + colVal[0]);
-        console.log("G: " + colVal[1]);
-        console.log("B: " + colVal[2]);
-        // var toPlay = mapToSound(colVal);
-        // for (var i = 0; i < toPlay.length; i++) {
-        //     // console.log(" PLAYING NOTESSSS + " + i);
-        //     notes[toPlay[i]].play();
-        // }
+        // console.log("R: " + colVal[0]);
+        // console.log("G: " + colVal[1]);
+        // console.log("B: " + colVal[2]);
 
-        var nextIndex = mapToSound(colVal);
+        var indexToPlay = mapToSound(colVal);
         // Add random chance to play chord for now (maybe 1 in 3?)
         var guess = floor(random() * 5);
         if (guess == 1) {
-            console.log("CHOOOOOORD");
-            chords[nextIndex].play();
+            chords[indexToPlay].play();
         } else {
-            notes[nextIndex].play();
-
+            notes[indexToPlay].play();
         }
-        // osc.freq(colVal[0]);
-        // osc2.freq(colVal[1]);
-        // osc3.freq(colVal[2]);
+
         timer = 0;
         row += 10;
-        interval = random(10, 100);
+
+        interval = random(20, 100);
+        // interval --> BPM = 60
+        // quarter note = 100;
+        // half note = 200;
+        // whole note = 400;
+        // eigth note = 50;
+        // var guess = floor(random() * 3);
+        // if (guess == 1) {
+        //     interval = 50;
+        // } else {
+        //     interval = 100;
+        // }
 
         if (debug) {
             stroke(color(255, 223, 0));
