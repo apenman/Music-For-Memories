@@ -2,41 +2,42 @@ var img;
 var interval = 10,
     timer = 0;
 var violet, indigo, blue, green, yellow, orange, red, colors;
-var Bb3, C4, D4, Eb4, F4, G4, A4, Bb4;
-var Bb3Chord, C4Chord, D4Chord, Eb4Chord, F4Chord, G4Chord, A4Chord;
+var bb3, c4, d4, eb4, f4, g4, a4, bb4;
+var bb3Chord, c4Chord, d4Chord, eb4Chord, f4Chord, g4Chord, a4Chord;
 var chords;
 var notes;
 var vid;
-var lastNote;
+var lastNote = 0;
 
 function preload() {
     // What image are we using?
-    // vid = createVideo("assets/vid.mp4");
-    img = loadImage("assets/mountains.jpg");
+    vid = createVideo("assets/vid.mp4");
+    // img = loadImage("assets/mountains.jpg");
     // img = loadImage("assets/rainbow.png");
 
     // Load notes
-    Bb3 = loadSound("assets/Bb3.mp3");
-    C4 = loadSound("assets/C4.mp3");
-    D4 = loadSound("assets/D4.mp3");
-    Eb4 = loadSound("assets/Eb4.mp3");
-    F4 = loadSound("assets/F4.mp3");
-    G4 = loadSound("assets/G4.mp3");
-    A4 = loadSound("assets/A4.mp3");
+    bb3 = loadSound("assets/Bb3.mp3");
+    c4 = loadSound("assets/C4.mp3");
+    d4 = loadSound("assets/D4.mp3");
+    eb4 = loadSound("assets/Eb4.mp3");
+    f4 = loadSound("assets/F4.mp3");
+    g4 = loadSound("assets/G4.mp3");
+    a4 = loadSound("assets/A4.mp3");
+    bb4 = loadSound("assets/Bb4.mp3")
 
     // Load chords
-    Bb3Chord = loadSound("assets/Bb3Chord.mp3");
-    C4Chord = loadSound("assets/C4Chord.mp3");
-    D4Chord = loadSound("assets/D4Chord.mp3");
-    Eb4Chord = loadSound("assets/Eb4Chord.mp3");
-    F4Chord = loadSound("assets/F4Chord.mp3");
-    G4Chord = loadSound("assets/G4Chord.mp3");
-    A4Chord = loadSound("assets/A4Chord.mp3");
+    bb3Chord = loadSound("assets/Bb3Chord.mp3");
+    c4Chord = loadSound("assets/C4Chord.mp3");
+    d4Chord = loadSound("assets/D4Chord.mp3");
+    eb4Chord = loadSound("assets/Eb4Chord.mp3");
+    f4Chord = loadSound("assets/F4Chord.mp3");
+    g4Chord = loadSound("assets/G4Chord.mp3");
+    a4Chord = loadSound("assets/A4Chord.mp3");
 
     // Notes in array
-    notes = [Bb3, C4, D4, Eb4, F4, G4, A4, Bb4];
+    notes = [bb3, c4, d4, eb4, f4, g4, a4, bb4];
     // Chords in array
-    chords = [Bb3Chord, C4Chord, D4Chord, Eb4Chord, F4Chord, G4Chord, A4Chord];
+    chords = [bb3Chord, c4Chord, d4Chord, eb4Chord, f4Chord, g4Chord, a4Chord, a4Chord];
 
     // Load base map colors
     violet = [238, 130, 238];
@@ -55,11 +56,11 @@ function setup() {
     createCanvas(windowWidth, windowHeight);
 
     // For image
-    image(img, 0, 0);
+    // image(img, 0, 0);
 
     // For video
-    //vid.volume(0);
-    //vid.play();
+    vid.volume(0);
+    vid.play();
 }
 
 // Takes a pixel's coordinate and samples a 5x5 grid around it
@@ -79,6 +80,8 @@ function getAverageRGBSquare(xVal, yVal) {
     avgG = floor(avgG / 121);
     avgB = floor(avgB / 121);
 
+    console.log("GOT COLOR -- r: " + avgR + " g: " + avgG + " b: " + avgB);
+
     return [avgR, avgG, avgB];
 }
 
@@ -86,15 +89,19 @@ function getAverageRGBSquare(xVal, yVal) {
 // Returns the average RGB value of the column as an array
 function getAverageRGBStrip(xVal) {
     var avgR = avgG = avgB = 0;
-    for (var i = 0; i < img.height / 10; i++) {
+    // for (var i = 0; i < img.height / 10; i++) {
+    for (var i = 0; i < vid.height / 10; i++) {
         var test = get(xVal, i * 10);
         avgR += test[0];
         avgG += test[1];
         avgB += test[2];
     }
-    avgR = floor(avgR / (img.height / 10));
-    avgG = floor(avgG / (img.height / 10));
-    avgB = floor(avgB / (img.height / 10));
+    // avgR = floor(avgR / (img.height / 10));
+    // avgG = floor(avgG / (img.height / 10));
+    // avgB = floor(avgB / (img.height / 10));
+    avgR = floor(avgR / (vid.height / 10));
+    avgG = floor(avgG / (vid.height / 10));
+    avgB = floor(avgB / (vid.height / 10));
 
     return [avgR, avgG, avgB];
 }
@@ -129,23 +136,59 @@ function mapToSound(col) {
     return chosenIndex;
 }
 
+// Attempts to smooth jumping of notes
+// Will try to make sure that the next note played is either adjacent to last note
+// or in the same scale as the last note
+function smoothJumps(indexToPlay) {
+    var ran = floor(random() * 2);
+    // 1/4 chance to play the jumping note
+    if (ran == 1) {
+        return indexToPlay;
+    }
+    // 3/4 chance to smooth out jump
+    else {
+        console.log("SMOOTH THIS BABY");
+        if (indexToPlay > lastNote) {
+            if (indexToPlay != lastNote + 2 || indexToPlay != lastNote + 4) {
+                var smooth = indexToPlay + 2;
+                if (smooth < notes.length - 1) {
+                    console.log("SMOOTHING UP -- " + smooth);
+                    return smooth;
+                }
+            }
+        } else {
+            if (indexToPlay != lastNote - 2 || indexToPlay != lastNote - 4) {
+                var smooth = indexToPlay - 2;
+                if (smooth >= 0) {
+                    console.log("SMOOTHING DOWN -- " + smooth);
+                    return smooth;
+                }
+            }
+        }
+    }
+
+    return indexToPlay;
+}
+
 // Function to handle repeated notes if wanted
 function repeatVariation(indexToPlay) {
     // if note is a repeat of last note
     if (lastNote && lastNote == indexToPlay) {
-
-        var ran = floor(random() * 3);
-        // 1/3 chance to play same note again
+        var ran = floor(random() * 4);
+        // 1/4 chance to play same note again
         if (ran == 1) {
             return indexToPlay;
         }
-        // 2/3 chance to play adjacent note in chord
+        // 3/4 chance to play adjacent note in chord
         else {
             // 1/2 chance to play up 1/2 chance to play down
-            if (ran = floor(random() * 2)) {
-
-            } else {
-
+            // if (ran = floor(random() * 2)) {
+            //
+            // } else {
+            //
+            // }
+            if (notes.length - 1 > indexToPlay) {
+                indexToPlay++;
             }
         }
     }
@@ -167,8 +210,11 @@ function chordVariation(indexToPlay) {
 // Handles all logic around finding and playing next sound file
 function playNote(colVal) {
     var indexToPlay = mapToSound(colVal);
-
+    console.log(" MAPPED " + indexToPlay);
     indexToPlay = repeatVariation(indexToPlay);
+    console.log(" REP GAVE " + indexToPlay);
+    // indexToPlay = smoothJumps(indexToPlay);
+    // console.log(" SMOOTH GOT " + indexToPlay);
 
     // notes[indexToPlay].play();
     // Play note with chance to play as chord
@@ -202,8 +248,10 @@ function highlightNote(colVal, xRand, yRand) {
 
 // Handles sampling a random points and drawing
 function sampleRandomPoint() {
-    var xRand = random(img.width - 40);
-    var yRand = random(img.height - 40);
+    // var xRand = random(img.width - 40);
+    // var yRand = random(img.height - 40);
+    var xRand = random(vid.width - 40);
+    var yRand = random(vid.height - 40);
 
     // Get the average RGB values around pixel
     var colVal = getAverageRGBSquare(xRand, yRand);
@@ -215,8 +263,8 @@ function sampleRandomPoint() {
 }
 
 function draw() {
-    // background(255);
-    // image(vid, 0, 0); // draw a second copy to canvas
+    background(255);
+    image(vid, 0, 0); // draw a second copy to canvas
 
     // If it's still not time to play a note...increment timer
     if (timer < interval) {
@@ -225,7 +273,7 @@ function draw() {
     // Let's play a note!
     else {
         // Redraw image to cover up old highlights
-        image(img, 0, 0);
+        // image(img, 0, 0);
 
         // Sample random location on image
         colVal = sampleRandomPoint();
@@ -240,4 +288,4 @@ function draw() {
         // Reset timer between notes
         timer = 0;
     }
-}
+};
