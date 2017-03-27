@@ -11,8 +11,8 @@ var lastNote = 0;
 
 function preload() {
     // What image are we using?
-    vid = createVideo("assets/vid.mp4");
-    // img = loadImage("assets/mountains.jpg");
+    // vid = createVideo("assets/vid.mp4");
+    img = loadImage("assets/mountains.jpg");
     // img = loadImage("assets/rainbow.png");
 
     // Load notes
@@ -56,11 +56,11 @@ function setup() {
     createCanvas(windowWidth, windowHeight);
 
     // For image
-    // image(img, 0, 0);
+    image(img, 0, 0);
 
     // For video
-    vid.volume(0);
-    vid.play();
+    // vid.volume(0);
+    // vid.play();
 }
 
 // Takes a pixel's coordinate and samples a 5x5 grid around it
@@ -89,8 +89,8 @@ function getAverageRGBSquare(xVal, yVal) {
 // Returns the average RGB value of the column as an array
 function getAverageRGBStrip(xVal) {
     var avgR = avgG = avgB = 0;
-    // for (var i = 0; i < img.height / 10; i++) {
-    for (var i = 0; i < vid.height / 10; i++) {
+    for (var i = 0; i < img.height / 10; i++) {
+        // for (var i = 0; i < vid.height / 10; i++) {
         var test = get(xVal, i * 10);
         avgR += test[0];
         avgG += test[1];
@@ -230,12 +230,14 @@ function getNextNoteLength() {
     // half note = 200;
     // whole note = 400;
     // eigth note = 50;
-    // var guess = floor(random() * 3);
-    // if (guess == 1) {
-    //     interval = 50;
-    // } else {
-    //     interval = 100;
-    // }
+    var guess = floor(random() * 7);
+    if (guess <= 4) {
+        return 50;
+    } else if (guess == 5) {
+        return 100;
+    } else {
+        return 25;
+    }
 }
 
 // Highlights a square in gold around sampled pixel
@@ -248,10 +250,10 @@ function highlightNote(colVal, xRand, yRand) {
 
 // Handles sampling a random points and drawing
 function sampleRandomPoint() {
-    // var xRand = random(img.width - 40);
-    // var yRand = random(img.height - 40);
-    var xRand = random(vid.width - 40);
-    var yRand = random(vid.height - 40);
+    var xRand = random(img.width - 40);
+    var yRand = random(img.height - 40);
+    // var xRand = random(vid.width - 40);
+    // var yRand = random(vid.height - 40);
 
     // Get the average RGB values around pixel
     var colVal = getAverageRGBSquare(xRand, yRand);
@@ -263,8 +265,8 @@ function sampleRandomPoint() {
 }
 
 function draw() {
-    background(255);
-    image(vid, 0, 0); // draw a second copy to canvas
+    // background(255);
+    // image(vid, 0, 0); // draw a second copy to canvas
 
     // If it's still not time to play a note...increment timer
     if (timer < interval) {
@@ -273,7 +275,7 @@ function draw() {
     // Let's play a note!
     else {
         // Redraw image to cover up old highlights
-        // image(img, 0, 0);
+        image(img, 0, 0);
 
         // Sample random location on image
         colVal = sampleRandomPoint();
@@ -282,8 +284,8 @@ function draw() {
         playNote(colVal);
 
         // Set the time until next note
-        //interval = getNextNoteLength();
-        interval = random(20, 100);
+        interval = getNextNoteLength();
+        // interval = random(20, 100);
 
         // Reset timer between notes
         timer = 0;
