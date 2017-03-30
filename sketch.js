@@ -80,6 +80,7 @@ function setup() {
     // For video
     vid.volume(0);
     vid.play();
+    loadPixels();
 }
 
 // Takes a pixel's coordinate and samples a 5x5 grid around it
@@ -87,22 +88,31 @@ function setup() {
 function getAverageRGBSquare(xVal, yVal) {
     var avgR = avgG = avgB = 0;
 
-    for (var i = -5; i <= 5; i++) {
-        for (var j = -5; j <= 5; j++) {
-            var test = get(xVal + i, yVal + j);
-            avgR += test[0];
-            avgG += test[1];
-            avgB += test[2];
-        }
-    }
-    avgR = floor(avgR / 121);
-    avgG = floor(avgG / 121);
-    avgB = floor(avgB / 121);
-
-    console.log("R: " + avgR + " G: " + avgG + " B: " + avgB);
-
-
-    return [avgR, avgG, avgB];
+    // for (var i = -5; i <= 5; i++) {
+    //     for (var j = -5; j <= 5; j++) {
+    //         var test = get(xVal + i, yVal + j);
+    //         avgR += test[0];
+    //         avgG += test[1];
+    //         avgB += test[2];
+    //     }
+    // }
+    // avgR = floor(avgR / 121);
+    // avgG = floor(avgG / 121);
+    // avgB = floor(avgB / 121);
+    //
+    // console.log("R: " + avgR + " G: " + avgG + " B: " + avgB);
+    //
+    //
+    // return [avgR, avgG, avgB];
+    var test = get(xVal, yVal);
+    return [test[0], test[1], test[2]];
+    // loadPixels();
+    // var r = pixels[4];
+    // var g = pixels[5];
+    // var b = pixels[6];
+    // var a = pixels[7];
+    // console.log("GOT -- " + a);
+    // return [r, g, b];
 }
 
 // Samples an entire column given an x coordinate
@@ -323,13 +333,13 @@ function sampleRandomPoint() {
     // Highlight the note on the image
     // highlightNote(colVal, xRand, yRand);
     // Create blips
-    blips.push(new Blip(xRand, yRand));
+    blips.push(new Blip(xRand, yRand, colVal));
 
     return colVal;
 }
 
 function drawBlips() {
-    for (var i = 0; i < blips.length - 1; i++) {
+    for (var i = blips.length - 1; i > 0; i--) {
         var blip = blips[i];
         blip.grow();
         if (blip.isAlive()) {
@@ -345,7 +355,7 @@ function drawBlips() {
 
 function draw() {
     background(255);
-    // image(vid, 0, 0); // draw a second copy to canvas
+    image(vid, 0, 0); // draw a second copy to canvas
     // Draw blips -- must be done every frame
     drawBlips();
 
