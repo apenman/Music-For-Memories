@@ -8,6 +8,7 @@ var chords;
 var notes;
 var vid;
 var lastNote = 0;
+var blips = [];
 /*
   lastNotes is a queue
   var queue = [];
@@ -71,6 +72,7 @@ function preload() {
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
+    noStroke();
 
     // For image
     // image(img, 0, 0);
@@ -97,7 +99,8 @@ function getAverageRGBSquare(xVal, yVal) {
     avgG = floor(avgG / 121);
     avgB = floor(avgB / 121);
 
-    console.log("GOT COLOR -- r: " + avgR + " g: " + avgG + " b: " + avgB);
+    console.log("R: " + avgR + " G: " + avgG + " B: " + avgB);
+
 
     return [avgR, avgG, avgB];
 }
@@ -119,6 +122,8 @@ function getAverageRGBStrip(xVal) {
     avgR = floor(avgR / (vid.height / 10));
     avgG = floor(avgG / (vid.height / 10));
     avgB = floor(avgB / (vid.height / 10));
+
+    console.log("R: " + avgR + " G: " + avgG + " B: " + avgB);
 
     return [avgR, avgG, avgB];
 }
@@ -164,12 +169,10 @@ function smoothJumps(indexToPlay) {
     }
     // 3/4 chance to smooth out jump
     else {
-        console.log("SMOOTH THIS BABY");
         if (indexToPlay > lastNote) {
             if (indexToPlay != lastNote + 2 || indexToPlay != lastNote + 4) {
                 var smooth = indexToPlay + 2;
                 if (smooth < notes.length - 1) {
-                    console.log("SMOOTHING UP -- " + smooth);
                     return smooth;
                 }
             }
@@ -177,7 +180,6 @@ function smoothJumps(indexToPlay) {
             if (indexToPlay != lastNote - 2 || indexToPlay != lastNote - 4) {
                 var smooth = indexToPlay - 2;
                 if (smooth >= 0) {
-                    console.log("SMOOTHING DOWN -- " + smooth);
                     return smooth;
                 }
             }
@@ -223,7 +225,6 @@ function repeatVariation(indexToPlay) {
         }
     }
 
-    console.log("CHECKING NOTES " + lastNotes + " WITH " + indexToPlay);
     // Using array of lastNotes
     // if (lastNotes.indexOf(indexToPlay) >= 0) {
     //     var count = 0;
@@ -268,9 +269,9 @@ function chordVariation(indexToPlay) {
 // Handles all logic around finding and playing next sound file
 function playNote(colVal) {
     var indexToPlay = mapToSound(colVal);
-    console.log(" MAPPED " + indexToPlay);
+    // console.log(" MAPPED " + indexToPlay);
     indexToPlay = repeatVariation(indexToPlay);
-    console.log(" REP GAVE " + indexToPlay);
+    // console.log(" REP GAVE " + indexToPlay);
     // indexToPlay = smoothJumps(indexToPlay);
     // console.log(" SMOOTH GOT " + indexToPlay);
 
@@ -279,7 +280,6 @@ function playNote(colVal) {
     chordVariation(indexToPlay);
 
     lastNote = indexToPlay;
-    console.log("push notes");
     lastNotes.push(indexToPlay);
     if (lastNotes.length > lastNotesMax)
         lastNotes.shift();
@@ -321,14 +321,33 @@ function sampleRandomPoint() {
     var colVal = getAverageRGBSquare(xRand, yRand);
 
     // Highlight the note on the image
-    highlightNote(colVal, xRand, yRand);
+    // highlightNote(colVal, xRand, yRand);
+    // Create blips
+    blips.push(new Blip(xRand, yRand));
 
     return colVal;
 }
 
+function drawBlips() {
+    for (var i = 0; i < blips.length - 1; i++) {
+        var blip = blips[i];
+        blip.grow();
+        if (blip.isAlive()) {
+            // console.log("BLIP " + i + " IS ALIVE");
+            blip.draw();
+        } else {
+            // console.log("BLIP " + i + " IS DEAD");
+
+            blips.splice(i, 1);
+        }
+    }
+}
+
 function draw() {
     background(255);
-    image(vid, 0, 0); // draw a second copy to canvas
+    // image(vid, 0, 0); // draw a second copy to canvas
+    // Draw blips -- must be done every frame
+    drawBlips();
 
     // If it's still not time to play a note...increment timer
     if (timer < interval) {
