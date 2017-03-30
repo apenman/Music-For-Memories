@@ -8,11 +8,20 @@ var chords;
 var notes;
 var vid;
 var lastNote = 0;
+/*
+  lastNotes is a queue
+  var queue = [];
+  queue.push(2);         // queue is now [2]
+  queue.push(5);         // queue is now [2, 5]
+  var i = queue.shift();
+*/
+var lastNotes = [];
+var lastNotesMax = 6;
 
 function preload() {
     // What image are we using?
-    // vid = createVideo("assets/vid.mp4");
-    img = loadImage("assets/mountains.jpg");
+    vid = createVideo("assets/nature.mp4");
+    // img = loadImage("assets/mountains.jpg");
     // img = loadImage("assets/rainbow.png");
 
     // Load notes
@@ -40,13 +49,21 @@ function preload() {
     chords = [bb3Chord, c4Chord, d4Chord, eb4Chord, f4Chord, g4Chord, a4Chord, a4Chord];
 
     // Load base map colors
-    violet = [238, 130, 238];
-    indigo = [75, 0, 130];
+    // violet = [238, 130, 238];
+    // indigo = [75, 0, 130];
+    // blue = [0, 0, 255];
+    // green = [0, 128, 0];
+    // yellow = [255, 255, 0];
+    // orange = [255, 165, 0];
+    // red = [255, 0, 0];
+
+    violet = [0, 130, 255];
+    indigo = [120, 75, 255];
     blue = [0, 0, 255];
     green = [0, 128, 0];
     yellow = [255, 255, 0];
-    orange = [255, 165, 0];
-    red = [255, 0, 0];
+    orange = [0, 165, 175];
+    red = [75, 200, 75];
 
     // Colors in array
     colors = [red, orange, yellow, green, blue, indigo, violet];
@@ -56,11 +73,11 @@ function setup() {
     createCanvas(windowWidth, windowHeight);
 
     // For image
-    image(img, 0, 0);
+    // image(img, 0, 0);
 
     // For video
-    // vid.volume(0);
-    // vid.play();
+    vid.volume(0);
+    vid.play();
 }
 
 // Takes a pixel's coordinate and samples a 5x5 grid around it
@@ -176,22 +193,63 @@ function repeatVariation(indexToPlay) {
     if (lastNote && lastNote == indexToPlay) {
         var ran = floor(random() * 4);
         // 1/4 chance to play same note again
-        if (ran == 1) {
-            return indexToPlay;
-        }
-        // 3/4 chance to play adjacent note in chord
-        else {
+        if (ran != 1) {
             // 1/2 chance to play up 1/2 chance to play down
-            // if (ran = floor(random() * 2)) {
-            //
-            // } else {
-            //
-            // }
-            if (notes.length - 1 > indexToPlay) {
-                indexToPlay++;
+            if (ran = floor(random() * 2)) {
+                if (notes.length - 1 > indexToPlay) {
+                    indexToPlay++;
+                } else {
+                    indexToPlay--;
+                }
+            } else {
+                if (indexToPlay > 0) {
+                    indexToPlay--;
+                } else {
+                    indexToPlay++;
+                }
             }
+
         }
     }
+
+    if (indexToPlay == 3) {
+        var ran = floor(random() * 6);
+        if (ran <= 1) {
+            indextoPlay = 5;
+        } else if (ran <= 3) {
+            indexToPlay = 7;
+        } else if (ran == 4) {
+            indexToPlay = 4;
+        }
+    }
+
+    console.log("CHECKING NOTES " + lastNotes + " WITH " + indexToPlay);
+    // Using array of lastNotes
+    // if (lastNotes.indexOf(indexToPlay) >= 0) {
+    //     var count = 0;
+    //     for (var i = 0; i < lastNotes.length - 1; i++) {
+    //         if (lastNotes[i] == indexToPlay)
+    //             count++;
+    //     }
+    //     if (count >= 1) {
+    //         console.log("REPEATING !!!");
+    //         var latest = lastNotes[lastNotes.length - 1];
+    //         if (indexToPlay > notes.length - 1) {
+    //             // At the end
+    //             indexToPlay = latest - 1;
+    //         } else if (indexToPlay < 1) {
+    //             // At the beg
+    //             indexToPlay = latest + 1;
+    //         } else {
+    //             var past = lastNotes[lastNotesMax - 1];
+    //             if (latest < past) {
+    //                 indexToPlay++;
+    //             } else {
+    //                 indexToPlay--;
+    //             }
+    //         }
+    //     }
+    // }
 
     return indexToPlay;
 }
@@ -200,7 +258,7 @@ function repeatVariation(indexToPlay) {
 function chordVariation(indexToPlay) {
     // 1/5 chance to play as chord (with note as root note)
     var guess = floor(random() * 5);
-    if (guess == 1) {
+    if (guess <= 1) {
         chords[indexToPlay].play();
     } else {
         notes[indexToPlay].play();
@@ -221,6 +279,10 @@ function playNote(colVal) {
     chordVariation(indexToPlay);
 
     lastNote = indexToPlay;
+    console.log("push notes");
+    lastNotes.push(indexToPlay);
+    if (lastNotes.length > lastNotesMax)
+        lastNotes.shift();
 }
 
 // Handle finding the length of the next note
@@ -250,10 +312,10 @@ function highlightNote(colVal, xRand, yRand) {
 
 // Handles sampling a random points and drawing
 function sampleRandomPoint() {
-    var xRand = random(img.width - 40);
-    var yRand = random(img.height - 40);
-    // var xRand = random(vid.width - 40);
-    // var yRand = random(vid.height - 40);
+    // var xRand = random(img.width - 40);
+    // var yRand = random(img.height - 40);
+    var xRand = random(vid.width - 40);
+    var yRand = random(vid.height - 40);
 
     // Get the average RGB values around pixel
     var colVal = getAverageRGBSquare(xRand, yRand);
@@ -265,8 +327,8 @@ function sampleRandomPoint() {
 }
 
 function draw() {
-    // background(255);
-    // image(vid, 0, 0); // draw a second copy to canvas
+    background(255);
+    image(vid, 0, 0); // draw a second copy to canvas
 
     // If it's still not time to play a note...increment timer
     if (timer < interval) {
@@ -275,7 +337,7 @@ function draw() {
     // Let's play a note!
     else {
         // Redraw image to cover up old highlights
-        image(img, 0, 0);
+        // image(img, 0, 0);
 
         // Sample random location on image
         colVal = sampleRandomPoint();
@@ -290,4 +352,4 @@ function draw() {
         // Reset timer between notes
         timer = 0;
     }
-};
+}
