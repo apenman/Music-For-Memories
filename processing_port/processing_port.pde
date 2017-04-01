@@ -300,3 +300,34 @@ void chordVariation(int indexToPlay) {
         notes[indexToPlay].play();
     }
 }
+
+// Attempts to smooth jumping of notes
+// Will try to make sure that the next note played is either adjacent to last note
+// or in the same scale as the last note
+int smoothJumps(int indexToPlay) {
+    int ran = Math.round(random(2));
+    // 1/4 chance to play the jumping note
+    if (ran == 1) {
+        return indexToPlay;
+    }
+    // 3/4 chance to smooth out jump
+    else {
+        if (indexToPlay > lastNote) {
+            if (indexToPlay != lastNote + 2 || indexToPlay != lastNote + 4) {
+                int smooth = indexToPlay + 2;
+                if (smooth < notes.length - 1) {
+                    return smooth;
+                }
+            }
+        } else {
+            if (indexToPlay != lastNote - 2 || indexToPlay != lastNote - 4) {
+                int smooth = indexToPlay - 2;
+                if (smooth >= 0) {
+                    return smooth;
+                }
+            }
+        }
+    }
+
+    return indexToPlay;
+}
