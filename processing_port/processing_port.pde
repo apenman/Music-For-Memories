@@ -1,29 +1,47 @@
+/*
+  TODO:
+  1. Make what I have presentable
+    a. Finalize blip colors / grow
+    b. Set note frequency and adjust mappings
+  2. Add chord progressions?
+  3. Add another video?
+  4. Clean up code
+*/
 import processing.sound.*;
 import processing.video.*;
 
 Movie myMovie;
-float x;
-float y;
-float r, g, b, radius;
+float x, y, r, g, b, radius;
 int timer, interval;
 ArrayList<Blip> blips;
 SoundFile bb3, c4, d4, eb4, f4, g4, a4, bb4;
 SoundFile bb3Chord, c4Chord, d4Chord, eb4Chord, f4Chord, g4Chord, a4Chord;
-color colVal;
+SoundFile c4_flute, d4_flute, eb4_flute, f4_flute, g4_flute, a4_flute, bb4_flute;
 PGraphics topLayer;
 color[] colors;
-color red,orange,yellow,green,blue,indigo,violet;
-int lastNote = 0;
-SoundFile[] notes,chords;
-int counter = 0;
-int nativeWidth, nativeHeight;
+color colVal, red, orange, yellow, green, blue, indigo, violet;
+int lastNote, lastChordCount, counter;
+SoundFile[] notes,chords, backing;
+int nativeWidth, nativeHeight, frameWidthOffset, frameHeightOffset;
+SoundFile back;
+int currentBackingTrack, backingTimer;
+int[] backingDurations;
 
-void setup()
-{
-  nativeWidth = 720;
-  nativeHeight = 540;
+
+void setup() {
    fullScreen(0); // Change 0 to 2 to move to second display
   //size(720, 540);
+  //size(360, 240);
+  nativeWidth = 720;
+  nativeHeight = 540;
+  frameWidthOffset = (width/2)-(nativeWidth/2);
+  frameHeightOffset = (height/2)-(nativeHeight/2);
+  counter = 0;
+  lastChordCount = 0;
+  lastNote = 0;
+  currentBackingTrack = 0;
+  backingTimer = 0;
+
   noStroke();
   myMovie = new Movie(this, "nature.mp4");
   myMovie.loop();
@@ -31,38 +49,13 @@ void setup()
   frame.setBackground(new java.awt.Color(0,0,0));
   blips = new ArrayList<Blip>();
 
-  violet = color(0, 130, 255);
-  indigo = color(120, 75, 255);
-  blue = color(0, 0, 255);
-  green = color(0, 128, 0);
-  yellow = color(255, 255, 0);
-  orange = color(0, 165, 175);
-  red = color(75, 200, 75);
-  colors = new int[]{red, orange, yellow, green, blue, indigo, violet};
+  initColors();
+  initNotes();
+  initChords();
+  initBacking();
 
-  // Load notes
-  bb3 = new SoundFile(this, "Bb3.mp3");
-  c4 = new SoundFile(this, "C4.mp3");
-  d4 = new SoundFile(this, "D4.mp3");
-  eb4 = new SoundFile(this, "Eb4.mp3");
-  f4 = new SoundFile(this, "F4.mp3");
-  g4 = new SoundFile(this, "G4.mp3");
-  a4 = new SoundFile(this, "A4.mp3");
-  bb4 = new SoundFile(this, "Bb4.mp3");
-
-  // Load chords
-  bb3Chord = new SoundFile(this, "Bb3Chord.mp3");
-  c4Chord = new SoundFile(this, "C4Chord.mp3");
-  d4Chord = new SoundFile(this, "D4Chord.mp3");
-  eb4Chord = new SoundFile(this, "Eb4Chord.mp3");
-  f4Chord = new SoundFile(this, "F4Chord.mp3");
-  g4Chord = new SoundFile(this, "G4Chord.mp3");
-  a4Chord = new SoundFile(this, "A4Chord.mp3");
-
-  // Notes in array
-  notes = new SoundFile[]{bb3, c4, d4, eb4, f4, g4, a4, bb4};
-  // Chords in array
-  chords = new SoundFile[]{bb3Chord, c4Chord, d4Chord, eb4Chord, f4Chord, g4Chord, a4Chord, a4Chord};
+  // Start playing backing track before loop starts
+  backing[0].play();
 }
 
 // Called every time a new frame is available to read
@@ -73,10 +66,9 @@ void movieEvent(Movie m) {
 void draw()
 {
   background(0);
-  image(myMovie, 0, 0, nativeWidth, nativeHeight);
-  println("DRAWING ____" + counter++);
+  image(myMovie, frameWidthOffset, frameHeightOffset, nativeWidth, nativeHeight);
   drawBlips();
-
+  controlBackingMusic();
   // If it's still not time to play a note...increment timer
   if (timer < interval) {
       timer++;
@@ -90,14 +82,74 @@ void draw()
       playNote(colVal);
 
       // Set the time until next note
-      //interval = getNextNoteLength();
-      interval = Math.round(random(20, 100));
+      interval = getNextNoteLength();
+      // interval = Math.round(random(20, 100));
 
       // Reset timer between notes
       timer = 0;
   }
 }
 
+// Loads note files and stores in an array
+void initNotes() {
+  // Load notes
+  bb3 = new SoundFile(this, "Bb3.mp3");
+  c4 = new SoundFile(this, "C4.mp3");
+  d4 = new SoundFile(this, "D4.mp3");
+  eb4 = new SoundFile(this, "Eb4.mp3");
+  f4 = new SoundFile(this, "F4.mp3");
+  g4 = new SoundFile(this, "G4.mp3");
+  a4 = new SoundFile(this, "A4.mp3");
+  bb4 = new SoundFile(this, "Bb4.mp3");
+
+  // Notes in array
+  notes = new SoundFile[]{bb3, c4, d4, eb4, f4, g4, a4, bb4};
+}
+
+// Loads chord files and stores in an array
+void initChords() {
+  // Load chords
+  bb3Chord = new SoundFile(this, "Bb3Chord.mp3");
+  c4Chord = new SoundFile(this, "C4Chord.mp3");
+  d4Chord = new SoundFile(this, "D4Chord.mp3");
+  eb4Chord = new SoundFile(this, "Eb4Chord.mp3");
+  f4Chord = new SoundFile(this, "F4Chord.mp3");
+  g4Chord = new SoundFile(this, "G4Chord.mp3");
+  a4Chord = new SoundFile(this, "A4Chord.mp3");
+
+  // Chords in array
+  chords = new SoundFile[]{bb3Chord, c4Chord, d4Chord, eb4Chord, f4Chord, g4Chord, a4Chord, a4Chord};
+}
+
+// Sets values for color maps and stores in an array
+void initColors() {
+  violet = color(0, 130, 255);
+  indigo = color(120, 75, 255);
+  blue = color(0, 0, 255);
+  green = color(0, 128, 0);
+  yellow = color(255, 255, 0);
+  orange = color(0, 165, 175);
+  red = color(75, 200, 75);
+  colors = new int[]{red, orange, yellow, green, blue, indigo, violet};
+}
+
+void initBacking() {
+  c4_flute = new SoundFile(this, "flutes/c4.mp3");
+  d4_flute = new SoundFile(this, "flutes/d4.wav");
+  eb4_flute = new SoundFile(this, "flutes/eb4.wav");
+  f4_flute = new SoundFile(this, "flutes/f4.wav");
+  g4_flute = new SoundFile(this, "flutes/g4.wav");
+  a4_flute = new SoundFile(this, "flutes/a4.wav");
+  bb4_flute = new SoundFile(this, "flutes/bb4.wav");
+
+  backing = new SoundFile[]{d4_flute, f4_flute, c4_flute, eb4_flute, d4_flute, f4_flute};
+  backingDurations = new int[]{21, 28, 20, 30, 21, 28};
+  for(int i = 0; i < backing.length-1; i++) {
+    backing[i].amp(0.05);
+  }
+}
+
+// Handles growing, drawing, and removing blips from array
 void drawBlips() {
     topLayer.beginDraw();
     for (int i = blips.size() - 1; i >= 0; i--) {
@@ -127,15 +179,15 @@ class Blip {
   }
 
   void draw() {
-    fill(255, 255, 255, alpha);
+    fill(255, 255, 255, (alpha-(alpha/4)));
     ellipse(x, y, rad, rad);
     fill(colVal, alpha);
-    ellipse(x, y, rad / 1.5, rad / 1.5);
+    ellipse(x, y, (rad / 1.5), (rad / 1.5));
   }
 
   void grow() {
-    rad += 3;
-    alpha -= 2;
+    rad += 9;
+    alpha -= 5;
   }
 
   boolean isAlive() {
@@ -145,8 +197,8 @@ class Blip {
 
 // Handles sampling a random points and drawing
 color sampleRandomPoint() {
-    int xRand = Math.round(random(myMovie.width - 40));
-    int yRand = Math.round(random(myMovie.height - 40));
+    int xRand = Math.round(random(frameWidthOffset + 40, frameWidthOffset + myMovie.width - 40));
+    int yRand = Math.round(random(frameHeightOffset + 40, frameHeightOffset + myMovie.height - 40));
 
     // Get the average RGB values around pixel
     color colVal = getAverageRGBSquare(xRand, yRand);
@@ -220,7 +272,6 @@ int mapToSound(color col) {
             maxOffset = Math.round(offset);
         }
     }
-    println("CHOSEN INDEX -- " + chosenIndex);
     return chosenIndex;
 }
 
@@ -286,18 +337,35 @@ int repeatVariation(int indexToPlay) {
     //         }
     //     }
     // }
-    println("UPDATED TO -- " + indexToPlay);
     return indexToPlay;
 }
 
 // Function to play chords if wanted
 void chordVariation(int indexToPlay) {
+    if(lastChordCount == 1) {
+      int rand = Math.round(random(2));
+      if(rand == 1) {
+         chords[indexToPlay].play();
+         lastChordCount++;
+         return;
+      }
+    }
+    else {
+      int rand = Math.round(random(3));
+      if(rand == 1) {
+         chords[indexToPlay].play();
+         lastChordCount++;
+         return;
+      }
+    }
     // 1/5 chance to play as chord (with note as root note)
     int guess = Math.round(random(5));
     if (guess <= 1) {
         chords[indexToPlay].play();
+         lastChordCount++;
     } else {
         notes[indexToPlay].play();
+        lastChordCount = 0;
     }
 }
 
@@ -330,4 +398,45 @@ int smoothJumps(int indexToPlay) {
     }
 
     return indexToPlay;
+}
+
+// Handle finding the length of the next note
+int getNextNoteLength() {
+    // interval --> BPM = 60
+    // quarter note = 100;
+    // half note = 200;
+    // whole note = 400;
+    // eigth note = 50;
+    int guess = Math.round(random(7));
+    if (guess <= 4) {
+        return 80;
+    } else if (guess == 5) {
+        return 160;
+    } else {
+        return 40;
+    }
+}
+
+void controlBackingMusic() {
+  // If not playing
+  // println("BACKING #" + currentBackingTrack + " IS PLAYING? -- " + backing[currentBackingTrack].isPlaying());
+  // if (backing[currentBackingTrack].isPlaying() == 0) {
+  //   println("It's NOT PLAYING");
+  //   currentBackingTrack = currentBackingTrack == backing.length - 1 ? 0 : currentBackingTrack++;
+  //   backing[currentBackingTrack].play();
+  // }
+  // else {
+  // }
+
+  if(backingTimer < (backingDurations[currentBackingTrack] * 45)) {
+    backingTimer++;
+  }
+  else {
+    println("NEW ONE!!!!!");
+    backing[currentBackingTrack].stop();
+    currentBackingTrack = currentBackingTrack == backing.length - 1 ? 0 : currentBackingTrack++;
+    backing[currentBackingTrack].cue(0);
+    backing[currentBackingTrack].play();
+    backingTimer = 0;
+  }
 }
