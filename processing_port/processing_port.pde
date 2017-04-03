@@ -64,8 +64,8 @@ void setup() {
   initBacking();
 
   // Start playing backing track before loop starts
-  //backing[currentBackingTrack].shiftGain(-50, -20, 2000);
-  //backing[currentBackingTrack].play();
+  backing[currentBackingTrack].shiftGain(-50, -20, 2000);
+  backing[currentBackingTrack].play();
 }
 
 // Called every time a new frame is available to read
@@ -78,7 +78,8 @@ void draw()
   background(0);
   image(myMovie, frameWidthOffset, frameHeightOffset, nativeWidth, nativeHeight);
   drawBlips();
-  //controlBackingMusic();
+  controlBackingMusic();
+
   // If it's still not time to play a note...increment timer
   if (timer < interval) {
       timer++;
@@ -145,12 +146,12 @@ void initColors() {
 
 void initBacking() {
   c4_flute = minim.loadFile("flutes/c4.mp3");
-  d4_flute = minim.loadFile("flutes/d4.wav");
-  eb4_flute = minim.loadFile("flutes/eb4.wav");
-  f4_flute = minim.loadFile("flutes/f4.wav");
-  g4_flute = minim.loadFile("flutes/g4.wav");
-  a4_flute = minim.loadFile("flutes/a4.wav");
-  bb4_flute = minim.loadFile("flutes/bb4.wav");
+  d4_flute = minim.loadFile("flutes/d4.mp3");
+  eb4_flute = minim.loadFile("flutes/eb4.mp3");
+  f4_flute = minim.loadFile("flutes/f4.mp3");
+  g4_flute = minim.loadFile("flutes/g4.mp3");
+  a4_flute = minim.loadFile("flutes/a4.mp3");
+  bb4_flute = minim.loadFile("flutes/bb4.mp3");
 
   backing = new AudioPlayer[]{d4_flute, f4_flute, c4_flute, eb4_flute, d4_flute, f4_flute};
   backingDurations = new int[]{21, 28, 20, 30, 28};
@@ -447,7 +448,8 @@ void controlBackingMusic() {
   //   backingTimer = 0;
   // }
   if(!backing[currentBackingTrack].isPlaying()) {
-      currentBackingTrack = currentBackingTrack == backing.length - 1 ? 0 : currentBackingTrack++;
+    println("COUNT: " + (backing.length));
+      currentBackingTrack = currentBackingTrack < backing.length - 1 ? currentBackingTrack + 1 : 0;
       backing[currentBackingTrack].cue(0);
       backing[currentBackingTrack].shiftGain(-50, -20, 2000);
       backing[currentBackingTrack].play();
