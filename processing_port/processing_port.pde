@@ -1,3 +1,10 @@
+import ddf.minim.*;
+import ddf.minim.analysis.*;
+import ddf.minim.effects.*;
+import ddf.minim.signals.*;
+import ddf.minim.spi.*;
+import ddf.minim.ugens.*;
+
 /*
   TODO:
   1. Make what I have presentable
@@ -16,22 +23,22 @@ int timer, interval;
 ArrayList<Blip> blips;
 SoundFile bb3, c4, d4, eb4, f4, g4, a4, bb4;
 SoundFile bb3Chord, c4Chord, d4Chord, eb4Chord, f4Chord, g4Chord, a4Chord;
-SoundFile c4_flute, d4_flute, eb4_flute, f4_flute, g4_flute, a4_flute, bb4_flute;
+AudioPlayer c4_flute, d4_flute, eb4_flute, f4_flute, g4_flute, a4_flute, bb4_flute;
 PGraphics topLayer;
 color[] colors;
 color colVal, red, orange, yellow, green, blue, indigo, violet;
 int lastNote, lastChordCount, counter;
-SoundFile[] notes,chords, backing;
+SoundFile[] notes,chords;
+AudioPlayer[] backing;
 int nativeWidth, nativeHeight, frameWidthOffset, frameHeightOffset;
-SoundFile back;
 int currentBackingTrack, backingTimer;
 int[] backingDurations;
+Minim minim;
 
 
 void setup() {
-   fullScreen(0); // Change 0 to 2 to move to second display
+  fullScreen(0); // Change 0 to 2 to move to second display
   //size(720, 540);
-  //size(360, 240);
   nativeWidth = 720;
   nativeHeight = 540;
   frameWidthOffset = (width/2)-(nativeWidth/2);
@@ -41,6 +48,8 @@ void setup() {
   lastNote = 0;
   currentBackingTrack = 0;
   backingTimer = 0;
+
+  minim = new Minim(this);
 
   noStroke();
   myMovie = new Movie(this, "nature.mp4");
@@ -55,7 +64,8 @@ void setup() {
   initBacking();
 
   // Start playing backing track before loop starts
-  backing[0].play();
+  //backing[currentBackingTrack].shiftGain(-50, -20, 2000);
+  //backing[currentBackingTrack].play();
 }
 
 // Called every time a new frame is available to read
@@ -68,7 +78,7 @@ void draw()
   background(0);
   image(myMovie, frameWidthOffset, frameHeightOffset, nativeWidth, nativeHeight);
   drawBlips();
-  controlBackingMusic();
+  //controlBackingMusic();
   // If it's still not time to play a note...increment timer
   if (timer < interval) {
       timer++;
@@ -134,19 +144,16 @@ void initColors() {
 }
 
 void initBacking() {
-  c4_flute = new SoundFile(this, "flutes/c4.mp3");
-  d4_flute = new SoundFile(this, "flutes/d4.wav");
-  eb4_flute = new SoundFile(this, "flutes/eb4.wav");
-  f4_flute = new SoundFile(this, "flutes/f4.wav");
-  g4_flute = new SoundFile(this, "flutes/g4.wav");
-  a4_flute = new SoundFile(this, "flutes/a4.wav");
-  bb4_flute = new SoundFile(this, "flutes/bb4.wav");
+  c4_flute = minim.loadFile("flutes/c4.mp3");
+  d4_flute = minim.loadFile("flutes/d4.wav");
+  eb4_flute = minim.loadFile("flutes/eb4.wav");
+  f4_flute = minim.loadFile("flutes/f4.wav");
+  g4_flute = minim.loadFile("flutes/g4.wav");
+  a4_flute = minim.loadFile("flutes/a4.wav");
+  bb4_flute = minim.loadFile("flutes/bb4.wav");
 
-  backing = new SoundFile[]{d4_flute, f4_flute, c4_flute, eb4_flute, d4_flute, f4_flute};
-  backingDurations = new int[]{21, 28, 20, 30, 21, 28};
-  for(int i = 0; i < backing.length-1; i++) {
-    backing[i].amp(0.05);
-  }
+  backing = new AudioPlayer[]{d4_flute, f4_flute, c4_flute, eb4_flute, d4_flute, f4_flute};
+  backingDurations = new int[]{21, 28, 20, 30, 28};
 }
 
 // Handles growing, drawing, and removing blips from array
@@ -428,15 +435,21 @@ void controlBackingMusic() {
   // else {
   // }
 
-  if(backingTimer < (backingDurations[currentBackingTrack] * 45)) {
-    backingTimer++;
-  }
-  else {
-    println("NEW ONE!!!!!");
-    backing[currentBackingTrack].stop();
-    currentBackingTrack = currentBackingTrack == backing.length - 1 ? 0 : currentBackingTrack++;
-    backing[currentBackingTrack].cue(0);
-    backing[currentBackingTrack].play();
-    backingTimer = 0;
+  // if(backingTimer < (backingDurations[currentBackingTrack] * 30)) {
+  //   backingTimer++;
+  // }
+  // else {
+  //   println("NEW ONE!!!!!");
+  //   backing[currentBackingTrack].stop();
+  //   currentBackingTrack++;
+  //   backing[currentBackingTrack].cue(0);
+  //   backing[currentBackingTrack].play();
+  //   backingTimer = 0;
+  // }
+  if(!backing[currentBackingTrack].isPlaying()) {
+      currentBackingTrack = currentBackingTrack == backing.length - 1 ? 0 : currentBackingTrack++;
+      backing[currentBackingTrack].cue(0);
+      backing[currentBackingTrack].shiftGain(-50, -20, 2000);
+      backing[currentBackingTrack].play();
   }
 }
