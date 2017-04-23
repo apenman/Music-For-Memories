@@ -4,16 +4,6 @@ import ddf.minim.effects.*;
 import ddf.minim.signals.*;
 import ddf.minim.spi.*;
 import ddf.minim.ugens.*;
-
-/*
-  TODO:
-  1. Make what I have presentable
-    a. Finalize blip colors / grow
-    b. Set note frequency and adjust mappings
-  2. Add chord progressions?
-  3. Add another video?
-  4. Clean up code
-*/
 import processing.sound.*;
 import processing.video.*;
 
@@ -419,7 +409,7 @@ int getNextNoteLength() {
     // half note = 200;
     // whole note = 400;
     // eigth note = 50;
-    
+
     // For native
     //int guess = Math.round(random(7));
     //if (guess <= 4) {
