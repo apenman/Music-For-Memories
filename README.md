@@ -11,3 +11,6 @@ From Matt:
 4. Maybe another part of image can generate bass line or backing track
 
 1. Find a few images that fit the mood I want. Cycle through them and explore
+
+# Issues
+1. IsPlaying() not working on the backing tracks -- probably caused by media event tracking video
