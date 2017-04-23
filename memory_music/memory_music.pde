@@ -43,7 +43,7 @@ void setup() {
   minim = new Minim(this);
 
   noStroke();
-  myMovie = new Movie(this, "nature.mp4");
+  myMovie = new Movie(this, "videos/nature.mp4");
   myMovie.loop();
   topLayer = createGraphics(width, height);
   frame.setBackground(new java.awt.Color(0,0,0));
@@ -96,14 +96,14 @@ void draw()
 // Loads note files and stores in an array
 void initNotes() {
   // Load notes
-  bb3 = new SoundFile(this, "Bb3.mp3");
-  c4 = new SoundFile(this, "C4.mp3");
-  d4 = new SoundFile(this, "D4.mp3");
-  eb4 = new SoundFile(this, "Eb4.mp3");
-  f4 = new SoundFile(this, "F4.mp3");
-  g4 = new SoundFile(this, "G4.mp3");
-  a4 = new SoundFile(this, "A4.mp3");
-  bb4 = new SoundFile(this, "Bb4.mp3");
+  bb3 = new SoundFile(this, "pianos/Bb3.mp3");
+  c4 = new SoundFile(this, "pianos/C4.mp3");
+  d4 = new SoundFile(this, "pianos/D4.mp3");
+  eb4 = new SoundFile(this, "pianos/Eb4.mp3");
+  f4 = new SoundFile(this, "pianos/F4.mp3");
+  g4 = new SoundFile(this, "pianos/G4.mp3");
+  a4 = new SoundFile(this, "pianos/A4.mp3");
+  bb4 = new SoundFile(this, "pianos/Bb4.mp3");
 
   // Notes in array
   notes = new SoundFile[]{bb3, c4, d4, eb4, f4, g4, a4, bb4};
@@ -112,13 +112,13 @@ void initNotes() {
 // Loads chord files and stores in an array
 void initChords() {
   // Load chords
-  bb3Chord = new SoundFile(this, "Bb3Chord.mp3");
-  c4Chord = new SoundFile(this, "C4Chord.mp3");
-  d4Chord = new SoundFile(this, "D4Chord.mp3");
-  eb4Chord = new SoundFile(this, "Eb4Chord.mp3");
-  f4Chord = new SoundFile(this, "F4Chord.mp3");
-  g4Chord = new SoundFile(this, "G4Chord.mp3");
-  a4Chord = new SoundFile(this, "A4Chord.mp3");
+  bb3Chord = new SoundFile(this, "pianos/Bb3Chord.mp3");
+  c4Chord = new SoundFile(this, "pianos/C4Chord.mp3");
+  d4Chord = new SoundFile(this, "pianos/D4Chord.mp3");
+  eb4Chord = new SoundFile(this, "pianos/Eb4Chord.mp3");
+  f4Chord = new SoundFile(this, "pianos/F4Chord.mp3");
+  g4Chord = new SoundFile(this, "pianos/G4Chord.mp3");
+  a4Chord = new SoundFile(this, "pianos/A4Chord.mp3");
 
   // Chords in array
   chords = new SoundFile[]{bb3Chord, c4Chord, d4Chord, eb4Chord, f4Chord, g4Chord, a4Chord, a4Chord};
